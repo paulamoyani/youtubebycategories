@@ -1,0 +1,615 @@
+<html>
+<head>
+<!DOCTYPE html>
+<meta charset=utf-8>
+<title>INFO 3300 PROJECT 2</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="https://rawgit.com/Teun/thenBy.js/master/thenBy.min.js"></script>
+<script src="sankey.js"></script>
+
+</head>
+<style>
+@font-face { font-family: Roboto; src: url('Roboto-Regular.ttf'); }
+
+
+
+ #window {
+   width: 80%;
+   margin: auto auto;
+   position: relative;
+   resize: both;
+   background-color: #F5F5F5;
+ }
+ #heading {
+   display: flex;
+ }
+ body {
+   font-family: 'Roboto', sans-serif;
+   font-style: normal;
+   font-variant: normal;
+   text-anchor: 'middle';
+   background-color: #F5F5F5;
+ }
+ h1{
+   font-family: 'Roboto';
+   position: relative;
+   text-align: left;
+   color: #282828;
+ }
+ h2{
+   font-family: 'Roboto', sans-serif;
+   font-size: 16;
+   color: gray;
+   padding-left: 0px;
+   padding-bottom: 0px;
+   margin-left: 490px;
+ }
+ h3{
+   font-family: 'Roboto', sans-serif;
+   font-size: 18;
+   color: gray;
+   padding-left: 0px;
+   padding-bottom: 50px;
+ }
+ h4 {
+   font-family: 'Roboto', sans-serif;
+   font-size: 16;
+   font-weight: bold;
+   text-align: center;
+   margin: 5px;
+
+ }
+ h5 {
+   font-family: 'Roboto', sans-serif;
+   font-size: 11;
+   text-align: center;
+   margin: 5px;
+ }
+ hr {
+   border-color: red;
+   border-width: .5px;
+ }
+ #checkExplain1{
+   font-size: 14;
+   position: absolute;
+   text-align: center;
+   left: 30px;
+ }
+ #checkExplain2{
+   position: absolute;
+   text-align: center;
+   left: 30px;
+   font-size: 10;
+   top: 50px;
+ }
+ .node rect {
+   fill-opacity: .9;
+   stroke: #ff0000;
+   fill: #ff0000;
+   stroke-width: 0;
+   shape-rendering: crispEdges;
+ }
+
+ .node text {
+   text-shadow: 0 1px 0 #fff;
+ }
+
+ .link {
+   fill: none;
+   stroke-opacity: .6;
+ }
+
+ .link:hover {
+   stroke-opacity: 1;
+   stroke: #232323;
+ }
+ .checkbox {
+   float: left;
+   padding-right: 150px;
+   padding-left: 50px;
+   position: relative;
+   top:100;
+   left: 0px;
+   font-size: 10;
+   border-width: 1px;
+   border-style: solid;
+   border-color: red;
+   border-radius: 20px;
+   height: 250px;
+   width: 10px;
+
+ }
+ svg {
+   float: right;
+   background-color: #F5F5F5;
+   position: absolute;
+   transform: translate(-30%, 0);
+ }
+ div.tooltipsankey {
+   opacity: 0;
+   transition: opacity .2s;
+   position: absolute;
+   text-align: center;
+   width: 95px;
+   height: 50px;
+   padding: 4px;
+   font: 11px 'Roboto';
+   background: silver;
+   border: 0px;
+   border-radius: 8px;
+   pointer-events: none;
+ }
+ .container {
+   display: block;
+   position: relative;
+   top: 110px;
+   padding-left: 35px;
+   cursor: pointer;
+   font-size: 15px;
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+ }
+
+ .container input {
+   position: absolute;
+   opacity: 0;
+   cursor: pointer;
+ }
+ /* Based the checkbox CSS on one shown in W3 Schools, but still changed some things*/
+
+ /* Create a custom checkbox */
+ .checkmark {
+   position: absolute;
+   top: -5px;
+   left: 0;
+   height: 25px;
+   width: 25px;
+   background-color: #A9A9A9;
+   font-size: 10;
+ }
+ label {
+  font-color: #282828;
+  font-size: 10;
+ }
+ /* On mouse-over, add a grey background color */
+ .container:hover input ~ .checkmark {
+   background-color: #ccc;
+ }
+ /* When the checkbox is checked, add a blue background */
+ .container input:checked ~ .checkmark {
+   background-color: #ff0000;
+ }
+ /* Create the checkmark/indicator (hidden when not checked) */
+ .checkmark:after {
+   content: "";
+   position: absolute;
+   display: none;
+ }
+ /* Show the checkmark when checked */
+ .container input:checked ~ .checkmark:after {
+   display: block;
+ }
+ /* Style the checkmark/indicator */
+ .container .checkmark:after {
+   left: 9px;
+   top: 5px;
+   width: 5px;
+   height: 10px;
+   border: solid white;
+   border-width: 0 3px 3px 0;
+   -webkit-transform: rotate(45deg);
+   -ms-transform: rotate(45deg);
+   transform: rotate(45deg);
+ }
+ p#footnotes {
+  position: relative;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  color: #808080;
+  top: 450px;
+  left: -200px;
+}
+p#footnotes a{
+  color: #282828;
+  text-decoration: none;
+}
+
+</style>
+<body>
+<div id="window">
+  <div id="heading">
+    <img src="yt_logo_rgb_light.png" alt="YouTube Logo" style="width:200px;height:50px; position: relative; padding-right:20px; padding-top: 10px">
+    <h1>Yo<span style="color: red">USA</span>Tube vs. Yo<span style="color: red">UK</span>Tube</h1>
+  </div>
+  <h3>A visualization of several months of data on daily trending YouTube videos of the United States and Great Britain.</h3>
+  <!-- <h2>November 2017 to April 2018</h2> -->
+  <div id="chart-elements">
+
+    <div class="checkbox"></div>
+    <h2>November 2017 to April 2018</h2>
+    <div id="chart" align="center">
+      <svg height="700" width="800" id="svg1" viewBox="150 0 500 800" preserveAspectRatio="xMidYMid meet" style="margin-left: 0 auto; margin-right: 0 auto">
+      </svg>
+    </div>
+  </div>
+
+  <script>
+
+  var svg = d3.select("svg")
+  .append("g");
+  var width = 600;
+  var height = 600;
+
+  var formatNumber = d3.format(",.0f"),
+                        format = function(d) { return formatNumber(d); },
+                        color = d3.scaleOrdinal(d3.schemePastel1);
+
+
+  // Set the sankey diagram properties
+  var sankey = d3.sankey()
+      .nodeWidth(20)
+      .nodePadding(20)
+      .size([width, height]);
+
+  var path = sankey.link();
+  var div = d3.select("body").append("div")
+    .attr("class", "tooltipsankey")
+    .style("opacity", 0);
+
+  var usaData;
+  var gbData;
+  var rawUsaData;
+  var rawGbData;
+
+  var criteria = [1,0,0,0]; //default
+
+  function selectBox(){
+          if(document.getElementById("likes").checked == true && criteria[0] != 1){
+            criteria[0] = 1;
+          }
+          if(document.getElementById("likes").checked == false && criteria[0] == 1){
+            criteria[0] = 0;
+          }
+          if(document.getElementById("views").checked == true && criteria[1] != 1){
+            criteria[1] = 1;
+          }
+          if(document.getElementById("views").checked == false && criteria[1] == 1){
+            criteria[1] = 0;
+          }
+          if(document.getElementById("dislikes").checked == true && criteria[2] != 1){
+            criteria[2] = 1;
+          }
+          if(document.getElementById("dislikes").checked == false && criteria[2] == 1){
+            criteria[2] = 0;
+          }
+          if(document.getElementById("comment_count").checked == true && criteria[3] != 1){
+            criteria[3] = 1;
+          }
+          if(document.getElementById("comment_count").checked == false && criteria[3] == 1){
+            criteria[3] = 0;
+          }
+  }
+
+
+  function selectItems(){
+              var res = "";
+              if (criteria[0] == "1"){ res+= "   likes"; if (criteria[1] == "1" || criteria[2] == "1" || criteria[3] == "1" ){ res+= ",";}}
+              if (criteria[1] == "1"){ res+= "   views"; if (criteria[2] == "1" || criteria[3] == "1") { res+= ","}}
+              if (criteria[2] == "1"){ res+= "   dislikes"; if (criteria[3] == "1" ) { res+= ","}}
+              if (criteria[3] == "1"){ res+= "   comments";}
+              return res + " among all videos in this category";
+            }
+
+
+  d3.queue()
+  .defer(d3.csv, "USvideos.csv")
+  .defer(d3.csv, "GBvideos.csv")
+  .await(function(error, data1, data2) {
+      if (error) {
+          console.error('Error: ' + error);
+          fail;
+      }
+      else {
+    	  console.log("start processing");
+        rawUsaData = data1;
+    	  rawGBData = data2;
+
+    	  nestedUsaData = d3.nest()
+    	  .key(function (d) { return d.category; })
+    	  .entries(data1);
+
+    	  nestedGBData = d3.nest()
+    	  .key(function (d) { return d.category; })
+    	  .entries(data2);
+
+    	  console.log("done processing");
+
+
+        //Probably insert interactivity if statements here on criteria:
+        nestedUsaData.forEach(function(d) {
+          d.values.forEach(function(t){
+          })
+        })
+
+          var checkExplain1 = '<h3 id="checkExplain1">Select video information<br>to show on the diagram:</h3>';
+          var checkExplain2 = '<h3 id="checkExplain2">Values selected will be represented<br>by the width of the lines</h3>';
+          var form = '<form action="index.html" method="post" id="checkbox1" style="font-family:Roboto"><label class="container"><input type="checkbox" name="option" value="likes" id="likes" onclick="selectBox()" checked> <span class="checkmark"></span>Likes</label><br><label class="container"><input type="checkbox" name="option" value="views" id="views" onclick="selectBox()"> <span class="checkmark"></span>Views</label><br><label class="container"><input type="checkbox" name="option" value="dislikes" id="dislikes" onclick="selectBox()"> <span class="checkmark"></span>Dislikes</label><br><label class="container"><input type="checkbox" name="option" value="comment_count" id="comment_count" onclick="selectBox()"> <span class="checkmark"></span>Comments</label></form>';
+
+          $(".checkbox").append(checkExplain1);
+          $(".checkbox").append(checkExplain2);
+          $(".checkbox").append(form);
+
+
+         $('.checkbox').click(function (){
+
+              //Cover previous diagrams
+        			var rectangle = svg.append("rect")
+                             .attr("x", -200)
+                             .attr("y", 0)
+                             .attr("width", 2000)
+                             .attr("height", 800)
+                             .style("fill", "#F5F5F5");
+                if ($('input[type=checkbox]:checked').length <= 0) {
+                   return;
+                 }
+
+              createSankey(criteria);
+        });
+
+
+
+      function createSankey(criteriaArray) {
+
+        UsaSummary = nestedUsaData.map(function (d) {
+          return {
+            Category: d.key,
+            Value: (d3.sum(d.values, d => d["likes"])*criteriaArray[0]) + (d3.sum(d.values, d => d["views"])*criteriaArray[1]) + (d3.sum(d.values, d => d["dislikes"])*criteriaArray[2]) + (d3.sum(d.values, d => d["comment_count"])*criteriaArray[3]),
+            Max_name: selectMax(d),
+            Thumbnail: d.values[0].thumbnail_link
+          };
+        });
+
+        GBSummary = nestedGBData.map(function (d) {
+          return {
+            Category: d.key,
+            Value: (d3.sum(d.values, d => d["likes"])*criteriaArray[0]) + (d3.sum(d.values, d => d["views"])*criteriaArray[1]) + (d3.sum(d.values, d => d["dislikes"])*criteriaArray[2]) + (d3.sum(d.values, d => d["comment_count"])*criteriaArray[3]),
+            Max_name: selectMax(d),
+            Thumbnail: d.values[0].thumbnail_link
+          };
+        });
+
+
+        function selectMax(d) {
+          if (criteriaArray[0]==1 && criteriaArray[1]==0 && criteriaArray[2]==0 && criteriaArray[3]==0) {
+             return d.values.sort(function(x, y){return d3.descending(x[criteriaArray[0]], y[criteriaArray[0]]);})[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==1 && criteriaArray[2]==0 && criteriaArray[3]==0) {
+             return d.values.sort(function(x, y){return d3.descending(x[criteriaArray[1]], y[criteriaArray[1]]);})[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==0 && criteriaArray[2]==1 && criteriaArray[3]==0) {
+             return d.values.sort(function(x, y){return d3.descending(x[criteriaArray[2]], y[criteriaArray[2]]);})[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==0 && criteriaArray[2]==0 && criteriaArray[3]==1) {
+             return d.values.sort(function(x, y){return d3.descending(x[criteriaArray[3]], y[criteriaArray[3]]);})[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==1 && criteriaArray[2]==0 && criteriaArray[3]==0) {
+             return d.values.sort(
+              firstBy("likes")
+             .thenBy("views"))[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==0 && criteriaArray[2]==1 && criteriaArray[3]==0) {
+              return d.values.sort(
+             firstBy("likes")
+             .thenBy("dislikes"))[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==0 && criteriaArray[2]==0 && criteriaArray[3]==1) {
+             return d.values.sort(
+             firstBy("likes")
+             .thenBy("comment_count"))[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==1 && criteriaArray[2]==1 && criteriaArray[3]==0) {
+            return d.values.sort(
+             firstBy("likes")
+             .thenBy("views")
+             .thenBy("dislikes"))[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==0 && criteriaArray[2]==1 && criteriaArray[3]==1) {
+            return d.values.sort(
+             firstBy("likes")
+             .thenBy("dislikes")
+             .thenBy("comment_count"))[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==1 && criteriaArray[2]==0 && criteriaArray[3]==1) {
+            return d.values.sort(
+             firstBy("likes")
+             .thenBy("views")
+             .thenBy("comment_count"))[0].title;
+          }
+          if (criteriaArray[0]==1 && criteriaArray[1]==1 && criteriaArray[2]==1 && criteriaArray[3]==1) {
+            return d.values.sort(
+             firstBy("likes")
+             .thenBy("views")
+             .thenBy("dislikes")
+             .thenBy("comment_count"))[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==1 && criteriaArray[2]==1 && criteriaArray[3]==0) {
+            return d.values.sort(
+             firstBy("views")
+             .thenBy("dislikes"))[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==1 && criteriaArray[2]==0 && criteriaArray[3]==1) {
+            return d.values.sort(
+             firstBy("views")
+             .thenBy("comment_count"))[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==1 && criteriaArray[2]==1 && criteriaArray[3]==1) {
+            return d.values.sort(
+             firstBy("views")
+             .thenBy("dislikes")
+             .thenBy("comment_count"))[0].title;
+          }
+          if (criteriaArray[0]==0 && criteriaArray[1]==0 && criteriaArray[2]==1 && criteriaArray[3]==1) {
+            return d.values.sort(
+             firstBy("dislikes")
+             .thenBy("comment_count"))[0].title;
+          }
+        }
+
+        var nodes = ["USA", "GB"];
+        var links = [];
+
+        UsaSummary.forEach(function (d) {
+          nodes.push(d.Category);
+          links.push({ "source": "USA",
+                       "target": d.Category,
+                       "value": d.Value,
+                       "color": "#000000",
+                       "thumbnail": d.Thumbnail,
+                       "max_name": d.Max_name});
+          });
+
+        GBSummary.forEach(function (d) {
+          if (!nodes.includes(d.Category)) {
+            nodes.push(d.Category);
+          }
+          links.push({ "source": "GB",
+                        "target": d.Category,
+                        "value": d.Value,
+                        "color": "#4d4d4d",
+                        "thumbnail": d.Thumbnail,
+                        "max_name": d.Max_name});
+          });
+
+        links.forEach(function (d, i) {
+           links[i].source = nodes.indexOf(links[i].source);
+           links[i].target = nodes.indexOf(links[i].target);
+        });
+
+        nodes.forEach(function (d, i) {
+          nodes[i] = { "name": d };
+        });
+
+
+        sankey
+          .nodes(nodes)
+          .links(links)
+          .layout(12);
+
+        var link = svg.append("g").selectAll(".link")
+          .data(links)
+          .enter().append("path")
+          .attr("class", "link")
+          .attr("d", path)
+          .style("stroke-width", function(d) { return Math.max(1, d.dy);})
+          .style("stroke", function(d) { return d.color ;});
+
+        link.on("mouseover", function(d) {
+            div.transition()
+                .duration(0)
+                .style("opacity", 1)
+                .style("width", 200)
+                .style("height", 270)
+                .style("border-color", "red")
+                .style("border-style", "solid")
+                .style("border-width", "1px")
+                .style("background-color", "white")
+                .style("font-size", 12)
+                .attr("id", "linkdiv");
+            div.html("<b><h4>" + d.source.name + "</b> → <b>"  + d.target.name + "</h4></b><hr><b><h4>" + format(d.value).toString() + "</h4></b><i><h5>" + selectItems() + "</h5></i><hr><h4>Top video:</h4>" + "<img src=" + d.thumbnail + "></br></br>" + d.max_name)
+                .style("left", (d3.event.pageX + 15) + "px")
+                .style("top", (d3.event.pageY) + "px");
+            })
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(0)
+                .style("opacity", 0);
+        });
+
+
+            // add in the nodes
+            var node = svg.append("g").selectAll(".node")
+                .data(nodes)
+              .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", function(d) {
+          		  return "translate(" + d.x + "," + d.y + ")"; })
+
+          // add the rectangles for the nodes
+            var rect = node.append("rect")
+                .attr("height", function(d) { return d.dy; })
+                .attr("width", sankey.nodeWidth())
+                .style("fill", function(d) {
+          		  return d.color = color(d.name.replace(/ .*/, "")); })
+                .style("stroke", function(d) {
+          		  return d3.rgb(d.color).darker(2); });
+
+            rect.on("mouseover", function(d) {
+            div.transition()
+                .duration(0)
+                .style("opacity", 1)
+                .style("width", 150)
+                .style("height", 100)
+                .style("border-color", "red")
+                .style("border-style", "solid")
+                .style("border-width", "1px")
+                .style("background-color", "white")
+                .style("font-size", 12)
+                .attr("id", "nodediv");  ;
+            div.html("<h4>" + d.name + "</h4><hr><h4>" + format(d.value).toString() + "</h4><i><h5>" + selectItems() + "</h5></i>")
+                .style("left", (d3.event.pageX + 15) + "px")
+                .style("top", (d3.event.pageY) + "px");
+            })
+            .on("mouseout", function(d) {
+              div.transition()
+                .duration(0)
+                .style("opacity", 0);
+        });
+
+          // add in the title for the nodes
+            node.append("text")
+                .attr("x", -6)
+                .attr("y", function(d) { return d.dy / 2; })
+                .attr("dy", ".35em")
+                .attr("text-anchor", "end")
+                .attr("transform", null)
+                .text(function(d) { return d.name; })
+              .filter(function(d) { return d.x > width / 2; })
+                .attr("x", 6 + sankey.nodeWidth())
+                .attr("text-anchor", "start");
+
+            // Fade-Effect on mouseover
+            node.on("mouseover", function(d) {
+              link.transition()
+                    .duration(400)
+                .style("opacity", 0);
+              link.filter(function(s) { return d.name == s.source.name; }).transition()
+                    .duration(700)
+                .style("opacity", 1);
+              link.filter(function(t) { return d.name == t.target.name; }).transition()
+                    .duration(700)
+                .style("opacity", 1);
+              })
+              .on("mouseout", function(d) { svg.selectAll(".link").transition()
+                    .duration(700)
+                .style("opacity", 1)} );
+
+      }
+      createSankey(criteria);
+
+
+      }
+  });
+  </script>
+  <p id="footnotes">
+    <u>SOURCES:</u><br>
+    <br>Datasets were compiled by <a href="https://www.kaggle.com/datasnaek/youtube-new">Trending YouTube Video Statistics (Kaggle 2018)</a>.
+    <br>Font used is <a href="https://fonts.google.com/specimen/Roboto">Roboto-Regular</a> by Christian Robertson.
+    <br>Youtube images and colors used were taken from <a href="https://www.youtube.com/yt/about/brand-resources/#logos-icons-colors">YouTube Brand Resources</a>.
+  </p>
+</div>
+</body>
+</html>

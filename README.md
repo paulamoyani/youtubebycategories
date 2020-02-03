@@ -1,2 +1,1 @@
-# youtubebycategories
-Youtube Interactive Data Visualization by Youtube Categories
+# CS-3300-Project-2
