@@ -1,3 +1,3 @@
 <h1> youtubebycategories </h1>
 
-Youtube Interactive Data Visualization by Youtube Categories
+Interactive Data Visualization of Youtube Categories United States vs. Youtube Categories Great Britain
